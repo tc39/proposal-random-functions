@@ -19,6 +19,24 @@ This proposal builds on the (now Stage 2) [Seeded Random](https://github.com/tc3
 There is a very large family of functions we could *potentially* include.
 This proposal is intentionally pared down to the basic set of commonly-written random number functions: random numbers in a range other than 0-1, random integers, random bigints, and random *bytes*, all drawn from a uniform distribution.
 
+## `Random.random(options: RandomOptions?): Number` ##
+
+Returns a random `Number` in the range `[0, 1)`
+(that is, including 0, but excluding 1),
+identical to `Math.random()`,
+but with a better suggested algorithm.
+
+If `options` is passed
+and either provides a valid `step`,
+or a truthy `excludeMin`,
+instead act exactly like `Random.number(0, 1, options)`.
+(Because the range is half-open,
+`excludeMax` doesn't do anything.)
+
+> [!NOTE]
+> [Issue 19](https://github.com/tc39/proposal-random-functions/issues/19) discusses the exact planned algorithm, using a single 64-bit chunk of randomness to get 2^53 possible values, uniformly spaced.
+> (Unless it needs to act like Random.number(), in which case it's a little different.)
+
 ## `Random.number(lo: Number, hi: Number, stepOrOptions: (Number or RandomOptions)?): Number` ##
 
 If `step` is omitted,
@@ -149,6 +167,8 @@ This means it is *extremely unlikely* for any *particular* value to be returned,
 On a slightly different topic, sometimes *most* values in a range are perfectly fine, but *some* cause problems. In general we can't automatically handle this, and you'll just have to do rejection sampling on your own. For example, if you're generating `Random.number(1, 10)` but have to avoid the pure integers, that's on you. That sort of thing is fairly rare, anyway.
 
 What's *not* rare is the *endpoints* being special in some way. For example, `1 / Random.number(0, 1)` is fine for *almost every possible value*, except for 0 itself, which'll result in Infinity. You'll only trigger that issue less than 1 quadrillionth of the time - too rare to ever depend on it happening, but not so rare that it's impossible to see at scale. By omitting the endpoints by default in `Random.number()`, we avoid an entire class of extremely-rare-but-possible bugs like this. And if the author *does* specify the `excludeMin`/`excludeMax` options, we make sure the endpoints don't show up even when the range would otherwise be empty. (This argument doesn't apply to random *ints*, because if an endpoint is problematic you can just... use the next int over, instead. "The next float over" is much more difficult to express.)
+
+Note that `Random.random()` ignores all of that and just has a half-open range. This is because `[0-1)` is just such a common, canonical range for this exact use-case that it's hard to justify violating it. Also, there's a super nice, cheap algorithm for generating numbers in this range, and it naturally generates the half-open range.
 
 
 # Prior Art
