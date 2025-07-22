@@ -130,7 +130,7 @@ identical to `TypedArray.prototype.fill()`.
 
 # Interaction with `Random.Seeded`
 
-All of the above functions will also be defined on the [`Random.Seeded` class](https://github.com/tc39/proposal-seeded-random/) as methods, with identical signatures and behavior. That is, `Random.number(...)` and `new SeededRandom(...).number(...)` will both work.
+All of the above functions will also be defined on the [`Random.Seeded` class](https://github.com/tc39/proposal-seeded-random/) as methods, with identical signatures and behavior. That is, `Random.number(...)` and `new Random.Seeded(...).number(...)` will both work.
 
 *Precise* generation algorithms will be defined for the `Random.Seeded` methods, to ensure reproducibility. It's recommended that the `Random` versions use the same algorithm, but not strictly required; doing so just lets you use an internal `Random.Seeded` object and avoid implementing the same function twice.
 
