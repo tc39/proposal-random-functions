@@ -27,13 +27,12 @@ returns a random `Number` in the range `(lo, hi)`
 with a uniform distribution.
 
 If there are no floats between `lo` and `hi`,
-returns `lo` unless the `excludeMin` option is passed;
-otherwise, returns `hi` unless the `excludeMax` option is passed;
+returns `lo` unless the `excludeMin` option is true;
+otherwise, returns `hi` unless the `excludeMax` option is true;
 otherwise, throws a {{RangeError}}.
 
 > [!NOTE]
-> [Issue 19](https://github.com/tc39/proposal-random-functions/issues/19) is for discussing the exact algorithm.
-> Also see [Issue 20](https://github.com/tc39/proposal-random-functions/issues/20) about whether the interval is half-open or closed, and what options are allowed.
+> [Issue 19](https://github.com/tc39/proposal-random-functions/issues/19) discusses the exact planned algorithm, using 2 64-bit chunks of randomness.
 
 If `step` is passed (directly, or as the `step` option)
 returns a random `Number` of the form `lo + N*step`,
@@ -77,24 +76,35 @@ instead throws a RangeError.
 
 > [!NOTE]
 > This is just a convenience function for what I expect will be a commonly-desired need.
+> It's sugar for some equivalent `Random.number()`.
 
 
-## `Random.int(lo: Number, hi: Number, step: Number?): Number` ##
+## `Random.int(lo: Number, hi: Number, stepOrOptions: (Number or RandomOptions)?): Number` ##
 
 Returns a random integer Number in the range `[lo, hi]`
 (that is, containing `lo` and `hi`),
 with a uniform distribution.
+If `excludeMin` or `excludeMax` options are passed and true,
+it excludes `lo` and `hi`.
+If the range thus contains no possible values,
+throws a RangeError.
 
-If `step` is passed,
+If `step` is passed (directly, or as the `step` option),
 returns a random integer Number of the form `lo + N*step`
 in the range `[lo, hi]`.
+(This might not be capable of returning the `hi` value,
+depending on the chosen `hi` and `step`.)
+If `excludeMin` or `excludeMax` options are passed and true,
+it excludes `lo` and `hi`.
+If the range thus contains no possible values,
+throws a RangeError.
+
 
 > [!NOTE]
-> See [Issue 16](https://github.com/tc39/proposal-random-functions/issues/16) for discussion on what algorithm to use,
-> and prior art among other languages.
+> [Issue 19](https://github.com/tc39/proposal-random-functions/issues/19) discusses what algorithm to use. Current plan uses 2 64-bit chunks if the lo-hi range contains less than 2^63 values. If the range is larger, the algorithm uses approximately N+1 64-bit chunks, where N is the number of 64-bit chunks it takes to represent the range in the first place (with an ignorable chance of rejection, requiring another set of chunks). Either way, *every* int in the range is possible and has a uniform chance, unlike `Random.number(lo, hi, {step:1})` for large ranges.
 
 
-## `Random.bigint(lo: BigInt, hi: BigInt, step: BigInt?): BigInt` ##
+## `Random.bigint(lo: BigInt, hi: BigInt, stepOrOptions: (BigInt or RandomOptions)?): BigInt` ##
 
 Identical to `Random.int()`, except it returns BigInts instead.
 
