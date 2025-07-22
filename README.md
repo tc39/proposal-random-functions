@@ -50,7 +50,7 @@ otherwise, returns `hi` unless the `excludeMax` option is true;
 otherwise, throws a {{RangeError}}.
 
 > [!NOTE]
-> [Issue 19](https://github.com/tc39/proposal-random-functions/issues/19) discusses the exact planned algorithm, using 2 64-bit chunks of randomness.
+> [Issue 19](https://github.com/tc39/proposal-random-functions/issues/19) discusses the exact planned algorithm, using 2 64-bit chunks of randomness to get up to 2^54 possible values, uniformly spaced.
 
 If `step` is passed (directly, or as the `step` option)
 returns a random `Number` of the form `lo + N*step`,
@@ -94,7 +94,7 @@ instead throws a RangeError.
 
 > [!NOTE]
 > This is just a convenience function for what I expect will be a commonly-desired need.
-> It's sugar for some equivalent `Random.number()`.
+> It's sugar for some equivalent `Random.number()` with a `step` argument.
 
 
 ## `Random.int(lo: Number, hi: Number, stepOrOptions: (Number or RandomOptions)?): Number` ##
@@ -119,7 +119,7 @@ throws a RangeError.
 
 
 > [!NOTE]
-> [Issue 19](https://github.com/tc39/proposal-random-functions/issues/19) discusses what algorithm to use. Current plan uses 2 64-bit chunks if the lo-hi range contains less than 2^63 values. If the range is larger, the algorithm uses approximately N+1 64-bit chunks, where N is the number of 64-bit chunks it takes to represent the range in the first place (with an ignorable chance of rejection, requiring another set of chunks). Either way, *every* int in the range is possible and has a uniform chance, unlike `Random.number(lo, hi, {step:1})` for large ranges.
+> [Issue 19](https://github.com/tc39/proposal-random-functions/issues/19) discusses what algorithm to use. Current plan uses 2 64-bit chunks if the lo-hi range contains less than 2^63 values. If the range is larger, the algorithm uses approximately N+1 64-bit chunks, where N is the number of 64-bit chunks it takes to represent the range in the first place (with an ignorable chance of rejection, requiring another set of chunks). Either way, *every* int in the range is possible and has a uniform chance, unlike `Random.number(lo, hi, {step:1})` for large ranges. (For `.int()`, if the range leaves the safe integer range, the values have non-uniform chances but are relative to the number of integers they represent, so the statistics are as close to uniform as possible.)
 
 
 ## `Random.bigint(lo: BigInt, hi: BigInt, stepOrOptions: (BigInt or RandomOptions)?): BigInt` ##
