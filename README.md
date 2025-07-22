@@ -19,38 +19,48 @@ This proposal builds on the (now Stage 2) [Seeded Random](https://github.com/tc3
 There is a very large family of functions we could *potentially* include.
 This proposal is intentionally pared down to the basic set of commonly-written random number functions: random numbers in a range other than 0-1, random integers, random bigints, and random *bytes*, all drawn from a uniform distribution.
 
-## `Random.number(lo: Number, hi: Number, step: Number?): Number` ##
+## `Random.number(lo: Number, hi: Number, stepOrOptions: (Number or RandomOptions)?): Number` ##
 
 If `step` is omitted,
 returns a random `Number` in the range `(lo, hi)`
 (that is, not containing either `lo` or `hi`)
 with a uniform distribution.
-(If there are no floats between `lo` and `hi`,
-returns `lo` or `hi` at random.)
+
+If there are no floats between `lo` and `hi`,
+returns `lo` unless the `excludeMin` option is passed;
+otherwise, returns `hi` unless the `excludeMax` option is passed;
+otherwise, throws a {{RangeError}}.
 
 > [!NOTE]
-> [Issue 19](https://github.com/tc39/proposal-random-functions/issues/19) The exact algorithm is not yet decided.
+> [Issue 19](https://github.com/tc39/proposal-random-functions/issues/19) is for discussing the exact algorithm.
 > Also see [Issue 20](https://github.com/tc39/proposal-random-functions/issues/20) about whether the interval is half-open or closed, and what options are allowed.
 
-If `step` is passed,
+If `step` is passed (directly, or as the `step` option)
 returns a random `Number` of the form `lo + N*step`,
 in the range `[lo, hi]`
 (that is, potentially containing `lo` or `hi`).
+If the `excludeMin` or `excludeMax` options are passed,
+it avoids returning `lo` or `hi`, respectively;
+if this results in there being no possible values to return,
+throws a {{RangeError}}.
 
 Specifically:
 
 1. Let `epsilon` be a small value related to `step`, chosen to match [`Iterator.range` issue #64](https://github.com/tc39/proposal-iterator.range/issues/64#issuecomment-2881243363)).
-2. Let `maxN` be the largest integer such that `lo + maxN*step` is less than or equal to `hi`.
-3. If `lo + maxN*step` is not within `epsilon` of `hi`,
+2. Let `minN` be 0 if the `excludeMin` option is false, or 1 if it's true.
+3. Let `maxN` be the largest integer such that `lo + maxN*step` is less than or equal to `hi`, if the `excludeMax` option is false, or less than `hi`, if it's true.
+4. If the `excludeMax` option is false,
+    and `lo + maxN*step` is not within `epsilon` of `hi`,
     but `lo + (maxN+1)*step` is
     (even if it's greater than `hi`),
-    set `maxN` to `maxN+1`.
-4. Let `N` be a random integer between `0` and `maxN`, inclusive.
-5. If `N` is `maxN`, and `lo + maxN*step` is within `epsilon` of `hi`,
+    set `maxN` to `maxN+1`. 
+5. If `minN` is larger than `maxN`, throw a RangeError.
+6. Let `N` be a random integer between `minN` and `maxN`, inclusive.
+7. If `N` is `maxN`, the `excludeMax` option is false, and `lo + maxN*step` is within `epsilon` of `hi`,
     return `hi`. Otherwise, return `lo + N*step`.
 
 > [!NOTE]
-> This `step` behavior is taken directly from [CSS's `random()` function](https://drafts.csswg.org/css-values-5/#random).
+> This `step`/`epsilon` behavior is taken directly from [CSS's `random()` function](https://drafts.csswg.org/css-values-5/#random).
 > It's also [being proposed for `Iterator.range()`](https://github.com/tc39/proposal-iterator.range/issues/64#issuecomment-2881243363).
 
 
