@@ -64,8 +64,19 @@ Specifically:
 > It's also [being proposed for `Iterator.range()`](https://github.com/tc39/proposal-iterator.range/issues/64#issuecomment-2881243363).
 
 
+## `Random.range(...)` ##
+
+This is an accompaniment to [`Iterator.range()`](https://github.com/tc39/proposal-iterator.range/),
+and will live either in this proposal or the `Iterator.range` proposal, whichever advances last.
+
+The arguments to `Random.range()` exactly match those of `Iterator.range()`,
+and are interpreted identically.
+The function returns one of the values in the range, chosen uniformly at random.
+If the equivalent range would be infinite,
+instead throws a RangeError.
+
 > [!NOTE]
-> It's probably generally a good thing to match [`Iterator.range()`](https://github.com/tc39/proposal-iterator.range/) in the signatures, which would mean including `inclusive` as an options-bag argument, and defaulting `int()` and `bigint()` (and `number()` using a `step`) to exclude their `hi` value. That would mean, to simulate a d6, you'd need to write either `Random.int(1, 7)` or `Random.int(1, 6, {inclusive:true})`. I'm unsure if the consistency is worth it, tho...
+> This is just a convenience function for what I expect will be a commonly-desired need.
 
 
 ## `Random.int(lo: Number, hi: Number, step: Number?): Number` ##
