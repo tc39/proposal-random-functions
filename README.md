@@ -134,6 +134,22 @@ All of the above functions will also be defined on the [`Random.Seeded` class](h
 
 *Precise* generation algorithms will be defined for the `Random.Seeded` methods, to ensure reproducibility. It's recommended that the `Random` versions use the same algorithm, but not strictly required; doing so just lets you use an internal `Random.Seeded` object and avoid implementing the same function twice.
 
+# Expected Questions
+
+> Why do some functions use an open range and others use a closed range?
+
+The open/closed-ness of the ranges expressed in the algorithms is somewhat incidental. They should all be *thought of* as closed ranges, that include both endpoints. This allows us to offer an identical set of options across the functions (`excludeMin` and `excludeMax`).
+
+Being open/closed/half-open is *extremely important and visible* for most random *int* use-cases - if simulating a d6, for example, if `Random.int(1,6)` uses an open or half-open range it'll give extremely incorrect statistics.
+
+This is *not true* for *almost all* random *numbers*. Most of the time, a `Random.number()` range will cover *at least* one full exponent regime of floats (the range between two consecutive powers of 2), meaning you'll have *at least* 2^52 possible return values (four *quadrillion*!). (The planned algorithm maxes out at 2^54, ~18 quadrillion, possible return values.) Even if it doesn't cover a full regime, any realistic scenario is almost certain to cover a *large fraction* of one, still guaranteeing an *extremely large* number of possible values, almost certainly in the billions to trillions.
+
+This means it is *extremely unlikely* for any *particular* value to be returned, such as the actual min or max value. Except in weird corner cases (ranges where the two endpoints are very close together), you simply can't ever depend on seeing those values in the first place, so whether they're actually possible to see or not is irrelevant. The fact that `excludeMin` and `excludeMax` don't actually do anything most of the time in `Random.number()` is simply undetectable, most of the time.
+
+On a slightly different topic, sometimes *most* values in a range are perfectly fine, but *some* cause problems. In general we can't automatically handle this, and you'll just have to do rejection sampling on your own. For example, if you're generating `Random.number(1, 10)` but have to avoid the pure integers, that's on you. That sort of thing is fairly rare, anyway.
+
+What's *not* rare is the *endpoints* being special in some way. For example, `1 / Random.number(0, 1)` is fine for *almost every possible value*, except for 0 itself, which'll result in Infinity. You'll only trigger that issue less than 1 quadrillionth of the time - too rare to ever depend on it happening, but not so rare that it's impossible to see at scale. By omitting the endpoints by default in `Random.number()`, we avoid an entire class of extremely-rare-but-possible bugs like this. And if the author *does* specify the `excludeMin`/`excludeMax` options, we make sure the endpoints don't show up even when the range would otherwise be empty. (This argument doesn't apply to random *ints*, because if an endpoint is problematic you can just... use the next int over, instead. "The next float over" is much more difficult to express.)
+
 
 # Prior Art
 
