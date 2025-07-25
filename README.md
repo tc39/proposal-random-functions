@@ -25,7 +25,7 @@ This proposal is intentionally pared down to the basic set of commonly-written r
 * `Random.int(a,b)` - generates an integer in a-b
 * `Random.bigint(a,b)` - generates a bigint in a-b
 * `Random.bytes(n)` - generates a UInt8Array filled with N random bytes
-* `Random.fillBytes(buf)` - fills `buf` with random bytwes
+* `Random.fillBytes(buf)` - fills `buf` with random bytes
 
 ## `Random.random(options: RandomOptions?): Number` ##
 
