@@ -52,7 +52,11 @@ returns a random `Number` in the range `(lo, hi)`
 (that is, not containing either `lo` or `hi`)
 with a uniform distribution.
 
-If there are no floats between `lo` and `hi`,
+If `lo` is greater than `hi`,
+throws a {{RangeError}}.
+
+If `lo` and `hi` are either equal or consecutive floats
+(such that there are no floats between them),
 returns `lo` unless the `excludeMin` option is true;
 otherwise, returns `hi` unless the `excludeMax` option is true;
 otherwise, throws a {{RangeError}}.
@@ -73,7 +77,7 @@ Specifically:
 
 1. Let `epsilon` be a small value related to `step`, chosen to match [`Iterator.range` issue #64](https://github.com/tc39/proposal-iterator.range/issues/64#issuecomment-2881243363)).
 2. Let `minN` be 0 if the `excludeMin` option is false, or 1 if it's true.
-3. Let `maxN` be the largest integer such that `lo + maxN*step` is less than or equal to `hi`, if the `excludeMax` option is false, or less than `hi`, if it's true.
+3. Let `maxN` be the largest integer such that `lo + maxN*step` is less than or equal to `hi`, if the `excludeMax` option is false, or less than `hi`, if it's true. (Or the opposite comparisons, if `step` is negative.)
 4. If the `excludeMax` option is false,
     and `lo + maxN*step` is not within `epsilon` of `hi`,
     but `lo + (maxN+1)*step` is
@@ -87,6 +91,11 @@ Specifically:
 > [!NOTE]
 > This `step`/`epsilon` behavior is taken directly from [CSS's `random()` function](https://drafts.csswg.org/css-values-5/#random).
 > It's also [being proposed for `Iterator.range()`](https://github.com/tc39/proposal-iterator.range/issues/64#issuecomment-2881243363).
+
+If `step` is positive, `lo` must be less than or equal to `hi`,
+or else a {{RangeError}} is thrown.
+If `step` is negative, `lo` must be greater than or equal to `hi`,
+or else a {{RangeError}} is thrown.
 
 
 ## `Random.range(...)` ##
@@ -124,6 +133,10 @@ If `excludeMin` or `excludeMax` options are passed and true,
 it excludes `lo` and `hi`.
 If the range thus contains no possible values,
 throws a RangeError.
+
+Has the same constraints on `lo` vs `hi` ordering,
+and the relationship with positive, negative, or omitted `step`,
+as `Random.number()`.
 
 
 > [!NOTE]
